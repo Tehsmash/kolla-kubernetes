@@ -68,9 +68,9 @@ setup_venv
 
 
 install_kolla_ansible () {
-  [ ! -d kolla ] && \
-    git clone https://github.com/openstack/kolla-ansible.git kolla
-  pushd kolla;
+  [ ! -d kolla-ansible ] && \
+    git clone https://github.com/openstack/kolla-ansible.git kolla-ansible
+  pushd kolla-ansible;
   pip install pip --upgrade
   pip install "ansible<2.1"
   pip install "python-openstackclient"
@@ -94,8 +94,8 @@ setup_etc () {
   sudo rm -rf /etc/kolla
   sudo rm -rf /usr/share/kolla
   sudo rm -rf /etc/kolla-kubernetes
-  sudo ln -s `pwd`/kolla/etc/kolla /etc/kolla
-  sudo ln -s `pwd`/kolla /usr/share/kolla
+  sudo ln -s `pwd`/kolla-ansible/etc/kolla /etc/kolla
+  sudo ln -s `pwd`/kolla-ansible /usr/share/kolla
   sudo ln -s `pwd`/etc/kolla-kubernetes /etc/kolla-kubernetes
 }
 setup_etc
@@ -121,22 +121,26 @@ setup_helm
 #
 setup_node_labels () {
   kubectl get nodes -L kubeadm.alpha.kubernetes.io/role --no-headers | awk '$NF ~ /^<none>/ { print $1}' | while read NODE ; do
-      #kubectl label node $NODE --overwrite kolla_controller=true
+      kubectl label node $NODE --overwrite kolla_controller=true
       kubectl label node $NODE --overwrite kolla_compute=true
   done
-  kubectl label node 172.16.35.12 --overwrite kolla_controller=true
+# NOTE(sdake) should this be removed?
+  #kubectl label node 172.16.35.12 --overwrite kolla_controller=true
 }
 setup_node_labels
 #
 #
 setup_kolla_kube_resources () {
-  kubectl create namespace kolla
+# NOTE(sdake) make this step idempotent
+  #kubectl create namespace kolla
   tools/secret-generator.py create
 }
 setup_kolla_kube_resources
 
-tools/setup-resolv-conf.sh
+# NOTE(sdake) make this step idempotent
+#tools/setup-resolv-conf.sh
 
+# NOTE(sdake) where is develoment_env set elsewhere in the repo
 if [[ "$development_env" = "docker" ]]; then
   echo "now run: tests/bin/dev_workflow.sh"
   exec /usr/bin/bash

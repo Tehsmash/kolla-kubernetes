@@ -7,7 +7,7 @@ TYPE="$2"
 BRANCH="$6"
 
 echo "kolla_base_distro: $1" >> kolla-ansible/etc/kolla/globals.yml
-cat tests/conf/ceph-all-in-one/kolla_config >> kolla-ansible/etc/kolla/globals.yml
+cat tests/conf/iscsi-all-in-one/kolla_config >> kolla-ansible/etc/kolla/globals.yml
 IP=172.18.0.1
 sed -i "s/^\(kolla_external_vip_address:\).*/\1 '$IP'/" \
     kolla-ansible/etc/kolla/globals.yml
@@ -29,6 +29,7 @@ else
 fi
 
 if [ "x$TYPE" == "xceph-multi" -o "x$TYPE" == "xdev-env" ]; then
+# NOTE(sdake) pass in any interface in some way
     echo "tunnel_interface: $interface" >> kolla-ansible/etc/kolla/globals.yml
     echo "storage_interface: $interface" >> \
         etc/kolla-kubernetes/kolla-kubernetes.yml
